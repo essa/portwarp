@@ -1,0 +1,30 @@
+#!/usr/bin/env ruby
+
+require "optparse"
+require "logger"
+
+Options = ARGV.getopts(
+  '',
+  'loglevel:INFO',
+  'random:',
+  'server:'
+)
+
+$log = Logger.new(STDOUT)
+$log.level = Logger.const_get(Options['loglevel'])
+$log.info "portwarp start"
+$log.debug Options.inspect
+
+case ARGV.size
+when 1
+  $log.info "server mode"
+  require 'portwarp/server.rb'
+  PortWarp::Server.new(Options).start(ARGV.first)
+when 0
+  STDERR.puts "portwarp base_pipe_url"
+  exit 1
+else
+  $log.info "client mode"
+  require 'portwarp/client.rb'
+  PortWarp::Client.new(Options).start(*ARGV)
+end
