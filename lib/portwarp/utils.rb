@@ -10,15 +10,19 @@ module PortWarp
       http.use_ssl = true if url.scheme == 'https'
       # http.verify_mode = OpenSSL::SSL::VERIFY_NONE
       5.times do
+        $log.debug "starting http #{verb} #{url_str}"
         begin
           http.start  do |http|
+            $log.debug "started http #{verb} #{url_str}"
             v = Net::HTTP.const_get(verb)
             req = v.new(url.path)
             block.call(http, req)
           end
         rescue Errno::ECONNREFUSED
+          $log.warn "error on http #{verb} #{url_str}"
           p $!
           sleep 1
+          $log.warn "retry on http #{verb} #{url_str}"
         end
       end
     end
@@ -26,12 +30,16 @@ module PortWarp
     def socket_to_piping(sock, url)
       i_pipe, o_pipe = IO.pipe
       t1 = Thread.start do
-        while true
-          buf = sock.readpartial(1024)
-          o_pipe.write buf
-          o_pipe.flush
+        begin
+          while true
+            buf = sock.readpartial(1024)
+            $log.debug "putting to #{url} #{buf}"
+            o_pipe.write buf
+            o_pipe.flush
+          end
+        rescue EOFError
         end
-        $log.debug "socket EOF"
+        $log.debug "reading from socket end"
       end
 
       t2 = Thread.start do
@@ -49,9 +57,10 @@ module PortWarp
     def piping_to_socket(url, sock)
       t1 = Thread.start do
         start_http(url, :Get) do |http, req|
-          $log.debug "start getting from #{url}"
+          $log.debug "getting from #{url} start"
           http.request req do |response|
             response.read_body do |chunk|
+            $log.debug "getting from #{url} #{chunk}"
               sock.write chunk
               sock.flush
             end
