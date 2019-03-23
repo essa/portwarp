@@ -41,20 +41,24 @@ module PortWarp
     def process_command(line)
       a = Shellwords.split(line)
       return unless a[2]
-      target_host, target_port = a[2].split(':')
-      url1 = a[3]
-      url2 = a[4]
-      $log.info "received command #{a.inspect}"
-      $log.debug "connecting to #{target_host}:#{target_port}"
-      TCPSocket.open(target_host, target_port) do |sock|
-        $log.info "connected to #{target_host}:#{target_port}"
+      if a[0] == 'start' and a[1] == 'forwarder'
+        target_host, target_port = a[2].split(':')
+        url1 = a[3]
+        url2 = a[4]
+        $log.info "received command #{a.inspect}"
+        $log.debug "connecting to #{target_host}:#{target_port}"
+        TCPSocket.open(target_host, target_port) do |sock|
+          $log.info "connected to #{target_host}:#{target_port}"
 
-        $log.debug "forwarding #{url1} -> #{a[2]}"
-        threads = piping_to_socket(url1, sock)
-        $log.debug "forwarding #{a[2]} -> #{url2}"
-        threads += socket_to_piping(sock, url2)
+          $log.debug "forwarding #{url1} -> #{a[2]}"
+          threads = piping_to_socket(url1, sock)
+          $log.debug "forwarding #{a[2]} -> #{url2}"
+          threads += socket_to_piping(sock, url2)
 
-        threads.each { |t| t.join }
+          threads.each { |t| t.join }
+        end
+      else
+        $log.warn "unknown command #{a[0]} #{a[1]}"
       end
     end
   end

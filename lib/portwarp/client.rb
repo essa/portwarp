@@ -13,16 +13,27 @@ module PortWarp
     def initialize(options)
     end
 
-    def start(ctl_pipe_url, port, target)
+    def start(ctl_pipe_url, port, target, *cmds)
       $log.debug "start listening #{port}"
       server = TCPServer.open(port)
       start_ctl_pipe_connection(ctl_pipe_url)
 
-      while true
-        sock = server.accept
-        $log.debug "accepted a connection"
+      if cmds.size > 0
+        $log.info "started with a command #{cmds}"
         Thread.start do
+          sock = server.accept
+          $log.debug "accepted a connection"
           start_forwarding(ctl_pipe_url, sock, port, target)
+        end
+        $log.info "invoking a command #{cmds.join(' ')}"
+        system cmds.join(' ')
+      else
+        while true
+          sock = server.accept
+          $log.debug "accepted a connection"
+          Thread.start do
+            start_forwarding(ctl_pipe_url, sock, port, target)
+          end
         end
       end
     end
