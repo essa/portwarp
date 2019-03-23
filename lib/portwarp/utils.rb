@@ -5,7 +5,6 @@ module PortWarp
   module Utils
     def start_http(url_str, verb, &block)
       url = URI.parse(url_str)
-      #p url.scheme, url.host, url.port, url.path
       http = Net::HTTP.new(url.host, url.port)
       http.use_ssl = true if url.scheme == 'https'
       # http.verify_mode = OpenSSL::SSL::VERIFY_NONE
@@ -33,7 +32,7 @@ module PortWarp
         begin
           while true
             buf = sock.readpartial(1024)
-            $log.debug "putting to #{url} #{buf}"
+            #$log.debug "putting to #{url} #{buf}"
             o_pipe.write buf
             o_pipe.flush
           end
@@ -60,7 +59,7 @@ module PortWarp
           $log.debug "getting from #{url} start"
           http.request req do |response|
             response.read_body do |chunk|
-            $log.debug "getting from #{url} #{chunk}"
+              #$log.debug "getting from #{url} #{chunk}"
               sock.write chunk
               sock.flush
             end

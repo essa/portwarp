@@ -19,11 +19,20 @@ module PortWarp
       url = base_url + random
       $log.info "server start url = #{url}"
       start_http(url, :Get) do |http, req|
-        $log.info "server started receiving"
-        http.request req do |response|
-          response.read_body do |chunk|
-            $log.info "server received #{chunk} "
-            process_command(chunk)
+        $log.debug "server started receiving"
+        i_pipe, o_pipe = IO.pipe
+        t1 = Thread.start do
+          http.request req do |response|
+            response.read_body do |chunk|
+              $log.debug "server received #{chunk.inspect} "
+              o_pipe.write chunk
+              o_pipe.flush
+            end
+          end
+        end
+        while line = i_pipe.gets
+          Thread.start do
+            process_command(line)
           end
         end
       end
@@ -35,10 +44,10 @@ module PortWarp
       target_host, target_port = a[2].split(':')
       url1 = a[3]
       url2 = a[4]
-      $log.debug "received command #{a.inspect} target=#{target_host}:#{target_port}"
+      $log.info "received command #{a.inspect}"
       $log.debug "connecting to #{target_host}:#{target_port}"
       TCPSocket.open(target_host, target_port) do |sock|
-        $log.debug "connected to #{target_host}:#{target_port}"
+        $log.info "connected to #{target_host}:#{target_port}"
 
         $log.debug "forwarding #{url1} -> #{a[2]}"
         threads = piping_to_socket(url1, sock)

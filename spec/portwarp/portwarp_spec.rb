@@ -5,7 +5,8 @@ require 'portwarp/server'
 require 'portwarp/client'
 
 describe 'portwarp' do
-  
+
+  # an echo server for testing
   ECHO_PORT = 10000
   before do
     @echo_server = fork do
@@ -66,7 +67,7 @@ describe 'portwarp' do
       before do
         $log = Logger.new(STDOUT)
         $log.formatter = Logger::FormatWithTid.new
-        $log.level = Logger::DEBUG
+        $log.level = Logger::INFO
         @portwarp_server = fork do
           PortWarp::Server.new({'random' => ctl_pipe}).start(PIPING_URL)
         end
