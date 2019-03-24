@@ -67,9 +67,9 @@ describe 'portwarp' do
       before do
         $log = Logger.new(STDOUT)
         $log.formatter = Logger::FormatWithTid.new
-        $log.level = Logger::INFO
+        $log.level = Logger::DEBUG
         @portwarp_server = fork do
-          PortWarp::Server.new({'random' => ctl_pipe}).start(PIPING_URL)
+          PortWarp::Server.new({'secret-key' => ctl_pipe}).start(PIPING_URL)
         end
       end
 

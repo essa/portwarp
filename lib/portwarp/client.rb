@@ -27,6 +27,7 @@ module PortWarp
         end
         $log.info "invoking a command #{cmds.join(' ')}"
         system cmds.join(' ')
+        cmd_pipe.puts "terminate"
       else
         while true
           sock = server.accept

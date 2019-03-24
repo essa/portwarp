@@ -6,7 +6,7 @@ require "logger"
 Options = ARGV.getopts(
   '',
   'loglevel:INFO',
-  'random:',
+  'secret-key:',
   'server:'
 )
 
