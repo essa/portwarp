@@ -8,6 +8,7 @@ $options = ARGV.getopts(
   'loglevel:INFO',
   'secret-key:',
   'server:',
+  'ssl-verify-none:false',
   'help'
 )
 
