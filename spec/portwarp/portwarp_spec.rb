@@ -68,6 +68,7 @@ describe 'portwarp' do
         $log = Logger.new(STDOUT)
         $log.formatter = Logger::FormatWithTid.new
         $log.level = Logger::DEBUG
+        $options = {}
         @portwarp_server = fork do
           PortWarp::Server.new({'secret-key' => ctl_pipe}).start(PIPING_URL)
         end

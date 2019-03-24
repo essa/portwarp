@@ -3,28 +3,43 @@
 require "optparse"
 require "logger"
 
-Options = ARGV.getopts(
+$options = ARGV.getopts(
   '',
   'loglevel:INFO',
   'secret-key:',
-  'server:'
+  'server:',
+  'help'
 )
 
 $log = Logger.new(STDOUT)
-$log.level = Logger.const_get(Options['loglevel'])
+$log.level = Logger.const_get($options['loglevel'])
 $log.info "portwarp start"
-$log.debug Options.inspect
+$log.debug $options.inspect
+
+def show_help
+  STDERR.puts <<EOS
+server mode:
+  portwarp base_pipe_url
+client mode:
+  portwarp command_pipe_url port target [command line ...]
+EOS
+end
+
+if $options['help']
+  show_help
+  exit 1
+end
 
 case ARGV.size
 when 1
   $log.info "server mode"
   require 'portwarp/server.rb'
-  PortWarp::Server.new(Options).start(ARGV.first)
+  PortWarp::Server.new($options).start(ARGV.first)
 when 0
-  STDERR.puts "portwarp base_pipe_url"
+  show_help
   exit 1
 else
   $log.info "client mode"
   require 'portwarp/client.rb'
-  PortWarp::Client.new(Options).start(*ARGV)
+  PortWarp::Client.new($options).start(*ARGV)
 end
