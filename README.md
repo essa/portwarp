@@ -1,7 +1,7 @@
 
 ### What is this?
 
-Portforwarding via [piping-server](https://github.com/nwtgck/piping-server) inspired by following article.
+A tool for portforwarding via [piping-server](https://github.com/nwtgck/piping-server) inspired by following article.
 
 - [Piping Server を介した双方向パイプによる，任意のネットワークコネクションの確立 \- Qiita](https://qiita.com/Cryolite/items/ed8fa237dd8eab54ef2f)
 
@@ -13,9 +13,7 @@ It is similar to port forwarding by `ssh -L` but source port and target port are
 
 You can run portwarp server in a private network if it is reachable to piping-server via outbound connection.
 
-```
-source program -> portwarp client -> piping-server <- portwarp server -> target server
-```
+<img src="images/portwarp.png" />
 
 ### Usage
 
@@ -52,6 +50,13 @@ Other example for client side
 ```
 $ bundle exec bin/portwarp --loglevel=DEBUG http://piping.server/29ef18e25dddece9 1022 localhost:22 ssh -p 1022 ec2-user@localhost
 ```
+
+### ToDo
+
+- [ ] notify error on server to client
+- [ ] describe options on --help
+- [ ] handling shell args and quotes
+- [ ] automate docker push with CI
 
 ### License
 
